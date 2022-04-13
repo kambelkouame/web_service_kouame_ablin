@@ -102,3 +102,7 @@
 2022-04-13 15:39:29[config.js] info: "GET /api/assignments/564556 304 - - 220.834 ms\n"
 2022-04-13 15:39:44[config.js] info: "GET /api/assignments/564556 304 - - 234.258 ms\n"
 2022-04-13 15:39:53[config.js] info: "GET /api/assignments?page=1&limit=5 304 - - 229.073 ms\n"
+2022-04-13 15:48:42[config.js] warn: "DEFAULT ENV:preproduction"
+2022-04-13 15:48:43[config.js] warn: "ENV ENTER:undefined"
+2022-04-13 15:48:43[config.js] info: "Server started at port : 8010"
+2022-04-13 15:48:47[config.js] info: "MongoDB connection succeeded."

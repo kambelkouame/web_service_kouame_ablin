@@ -1,0 +1,7 @@
+version: '2.1'
+services:
+  mqash_chatbot_core:
+    build: .
+    ports:
+      - "8010:8010"
+
