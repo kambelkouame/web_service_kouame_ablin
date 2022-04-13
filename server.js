@@ -1,62 +1,84 @@
-let express = require('express');
-let app = express();
-let bodyParser = require('body-parser');
-let assignment = require('./routes/assignments');
+require('./config/config');
+require('./models/db.config');
+require('./config/passportConfig');
+const loggers = require('./logger/logger');
 
-let mongoose = require('mongoose');
-mongoose.Promise = global.Promise;
-//mongoose.set('debug', true);
 
-// remplacer toute cette chaine par l'URI de connexion à votre propre base dans le cloud s
-const uri = 'mongodb+srv://mb:toto@cluster0.xtr0u.mongodb.net/assignments?retryWrites=true&w=majority';
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const passport = require('passport');
+const path = require('path');
+const morgan = require('morgan');
+const moment = require('moment');
 
-const options = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify:false
-};
 
-mongoose.connect(uri, options)
-  .then(() => {
-    console.log("Connecté à la base MongoDB assignments dans le cloud !");
-    console.log("at URI = " + uri);
-    console.log("vérifiez with http://localhost:8010/api/assignments que cela fonctionne")
+var app = express();
+
+const whitelist = ['http://localhost:4200', 'http://localhost:3000', 'http://127.0.0.1:4200'];
+const corsOptions = {
+    origin: function(origin, callback) {
+        return callback(null, true); // allow all
+        if (whitelist.indexOf(origin) !== -1) {
+            return callback(null, true)
+        } else {
+            return callback(new Error('Not allowed by CORS'))
+        }
     },
-    err => {
-      console.log('Erreur de connexion, recommencez: ', err);
-    });
+}
 
-// Pour accepter les connexions cross-domain (CORS)
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  next();
-});
 
 // Pour les formulaires
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-let port = process.env.PORT || 8010;
 
-// les routes
-const prefix = '/api';
 
+//app.use(morgan('combined'));
+app.use(morgan('dev'));
+app.use(morgan('tiny', { stream: loggers.stream }));
+// middleware
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: false
+}));
+app.use(cors(corsOptions));
+app.use(passport.initialize());
+//monit my server
+app.use(require('express-status-monitor')());
+
+app.set('view engine', 'pug');
+app.use(express.static("public"))
+
+app.set("views", path.join(__dirname, 'public/views'));
+
+
+
+
+const assignRouter = require('./routes/assignment.router');
+
+
+app.use('/api', assignRouter);
+
+
+
+loggers.warn('ENV ENTER:' + process.env.NODE_ENV);
+
+app.listen(process.env.PORT, () => loggers.info(`Server started at port : ${process.env.PORT}`));
+
+/*
 app.route(prefix + '/assignments')
-  .get(assignment.getAssignments)
-  .post(assignment.postAssignment)
-  .put(assignment.updateAssignment);
+    .get(assignment.getAssignments)
+    .post(assignment.postAssignment)
+    .put(assignment.updateAssignment);
 
 app.route(prefix + '/assignments/:id')
-  .get(assignment.getAssignment)
-  .delete(assignment.deleteAssignment);
+    .get(assignment.getAssignment)
+    .delete(assignment.deleteAssignment);
 
 
 // On démarre le serveur
 app.listen(port, "0.0.0.0");
 console.log('Serveur démarré sur http://localhost:' + port);
 
-module.exports = app;
-
-
+module.exports = app;*/
