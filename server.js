@@ -12,7 +12,7 @@ const path = require('path');
 const morgan = require('morgan');
 const moment = require('moment');
 
-
+let port = process.env.PORT || 8010;
 var app = express();
 
 const whitelist = ['http://localhost:4200', 'http://localhost:3000', 'http://127.0.0.1:4200'];
@@ -64,8 +64,11 @@ app.use('/api', assignRouter);
 
 loggers.warn('ENV ENTER:' + process.env.NODE_ENV);
 
-app.listen(process.env.PORT, () => loggers.info(`Server started at port : ${process.env.PORT}`));
+//app.listen(process.env.PORT, () => loggers.info(`Server started at port : ${process.env.PORT}`));
+app.listen(port, "0.0.0.0");
+console.log('Serveur démarré sur http://localhost:' + port);
 
+module.exports = app;
 /*
 app.route(prefix + '/assignments')
     .get(assignment.getAssignments)
